@@ -1,0 +1,69 @@
+---
+title: "Visualizing Large Distributions"
+format:
+  html:
+    keep-md: true
+editor: visual
+---
+
+# Task Description
+
+In this task, we will explore and analyze the `nycflights13::flights` dataset using R. To begin, make sure you have the `tidyverse` and `nycflights13` packages installed and loaded.
+
+```{r}
+# Load the tidyverse package
+library(tidyverse)
+
+```
+
+```{r}
+# Load the nycflights13 package (if not already installed)
+# install.packages("nycflights13")
+
+# Load the flights dataset
+library(nycflights13)
+data(flights)
+
+```
+
+```{r}
+
+?nycflights13::flights
+
+```
+
+# Summary Plot
+
+I arrived at choosing the 'dep_delay' and 'arr_delay' columns then visualized the distribution for Departure Delay and Arrival Delay. In the insights of the Distribution Delay shown the data points closer to 0-1 min and same for Departure Arrival close to 0-1 min. For the 'Bivariate Summary of Departure Delay vs. Arrival Delay' see high cluster of smaller delay to smaller arrival times in minutes.
+
+```{r}
+
+variable1 <- "dep_delay"
+variable2 <- "arr_delay"
+
+
+dep_delay_plot <- ggplot(flights, aes(x = dep_delay)) +
+  geom_histogram(binwidth = 10, fill = "skyblue", color = "black") +
+  labs(title = "Distribution of Departure Delay",
+       x = "Departure Delay (minutes)",
+       y = "Frequency")
+
+arr_delay_plot <- ggplot(flights, aes(x = arr_delay)) +
+  geom_histogram(binwidth = 10, fill = "salmon", color = "black") +
+  labs(title = "Distribution of Arrival Delay",
+       x = "Arrival Delay (minutes)",
+       y = "Frequency")
+
+bivariate_summary_plot <- ggplot(flights, aes(x = dep_delay, y = arr_delay)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  labs(title = "Bivariate Summary of Departure Delay vs. Arrival Delay",
+       x = "Departure Delay (minutes)",
+       y = "Arrival Delay (minutes)")
+
+
+dep_delay_plot
+arr_delay_plot
+bivariate_summary_plot
+
+
+```

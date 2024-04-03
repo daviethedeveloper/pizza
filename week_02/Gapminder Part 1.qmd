@@ -1,0 +1,46 @@
+---
+title: "Gapminder Part 1"
+format:
+  html:
+    keep-md: true
+editor: visual
+---
+
+```{r}
+# Load necessary libraries
+library(gapminder)
+library(tidyverse)
+library(ggplot2)
+
+# Remove Kuwait from the dataset
+gapminder <- gapminder %>% filter(country != "Kuwait")
+
+```
+
+```{r}
+head(gapminder)
+```
+
+```{r}
+
+# Filter the data for the specified years
+data_filtered <- gapminder %>%
+  filter(year %in% c(1952, 1957, 1962, 1967, 1972, 1977, 1982, 1987, 1992, 1997, 2002, 2007))
+
+```
+
+```{r}
+
+ggplot(data_filtered, aes(x = lifeExp, y = gdpPercap, color = continent, size = pop / 100000)) +
+  geom_point(alpha = 0.7) +
+  labs(size = "Population (100k)",
+       x="Life Expectancy",
+       y="GDP per Capita") +
+  scale_x_continuous(breaks = c(0, 40, 60, 80)) +
+  scale_y_continuous(breaks = seq(10000, 50000, 10000)) +
+  theme_bw() +
+  facet_grid(. ~ year) +
+  theme(strip.text = element_text(size = 12))
+
+
+```
