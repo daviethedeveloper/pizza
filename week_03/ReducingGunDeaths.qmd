@@ -1,0 +1,150 @@
+---
+title: "Reducing Gun Deaths"
+format:
+  html:
+    keep-md: true
+editor: visual
+---
+
+```{r}
+# Packages
+
+#install.packages("ggplot2")
+#install.packages("readr")
+
+library(ggplot2)
+library(readr)
+
+
+```
+
+```{r}
+
+# Data
+
+url <- "https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv"
+
+data <- read_csv(url)
+
+head(data)
+
+```
+
+```{r}
+
+col_names <- colnames(data)
+col_names
+
+```
+
+```{r}
+
+
+str(data)
+
+```
+
+```{r}
+
+
+unique_values <- unique(data$hispanic)
+
+unique_values
+
+```
+
+```{r}
+
+unique_values_year <- unique(data$year)
+
+unique_values_year
+```
+
+## Summary of Article FiveThirtyEight
+
+This article is a comprehensive and data-driven exploration of the multifaceted issue of gun-related fatalities in the United States. It delves into critical subtopics, such as the disturbing trends of suicides among middle-aged men, the tragic impact of homicides disproportionately affecting young Black men, and the often-overlooked but significant occurrence of accidental deaths related to firearms. By synthesizing and presenting data from various sources, this project provides valuable insights and a holistic perspective on the complex challenges surrounding gun deaths, contributing to a broader understanding of this pressing societal issue.
+
+## Distribution of Gun-Related Incidents by Intent
+
+Here showing the visualize the distribution of gun-related incidents by intent (e.g., homicide, suicide) using the "intent" column.
+
+```{r}
+
+
+
+plot <- ggplot(data, aes(x = intent)) +
+  geom_bar(fill = "red") +
+  labs(title = "Distribution of Gun-Related Incidents by Intent",
+       x = "Intent",
+       y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+print(plot)
+
+
+```
+
+## Seasonal Distribution of Incidents by Intent:
+
+This bar plot illustrates the distribution of gun-related incidents by intent (e.g., homicide, suicide) across different seasons. It helps identify whether there are notable variations in incident types during different seasons, allowing the client to tailor their commercials accordingly.
+
+```{r}
+
+# Create a seasonal bar plot of incidents by intent
+
+
+plot1 <- ggplot(data, aes(x = month, fill = intent)) +
+  geom_bar(position = "stack") +
+  labs(title = "Monthly Distribution of Incidents by Intent",
+       x = "Month",
+       y = "Count",
+       fill = "Intent") +
+  theme_minimal()
+
+# Display the plot
+print(plot1)
+
+
+
+```
+
+## Age Distribution of Incidents by Season:
+
+This box plot visualizes the age distribution of individuals involved in gun-related incidents for each season. It helps the client understand if certain age groups are more affected during specific seasons.
+
+```{r}
+
+
+plot2 <- ggplot(data, aes(x = month, y = age, fill = month)) +
+  geom_boxplot() +
+  labs(title = "Age Distribution of Incidents by Month",
+       x = "Month",
+       y = "Age",
+       fill = "Month") +
+  theme_minimal()
+
+# Display the plot
+print(plot2)
+
+
+```
+
+## Incident Trends Over Years:
+
+This line plot shows the trends in gun-related incidents over the years. By examining year-to-year changes, the client can identify any significant increases or decreases in incidents during specific seasons, helping them plan targeted campaigns.
+
+```{r}
+
+plot3 <- ggplot(data, aes(x = year, group = 1)) +
+  geom_line(stat = "count") +
+  labs(title = "Incident Trends Over Years",
+       x = "Year",
+       y = "Count") +
+  theme_minimal()
+
+# Display the plot
+print(plot3)
+
+```

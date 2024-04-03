@@ -1,0 +1,130 @@
+---
+title: "Wings To Fly"
+author: "David Pineda"
+format:
+  html:
+    keep-md: true
+editor: visual
+---
+
+# Import Packages
+
+```{r}
+
+#install.packages("nycflights13")
+
+
+# Load the nycflights13 package
+library(nycflights13)
+library(dplyr)
+library(ggplot2)
+
+
+data("flights")
+
+head(flights)
+
+```
+
+```{r}
+colnames(flights)
+```
+
+# Question 1
+
+For each origin airport (JFK, EWR, LGA), which airline has the lowest 75th percentile of departure delay for flights scheduled to leave earlier than noon?
+
+In analyzing the flight data, I can identified the airlines with the lowest 75th percentile departure delays for morning flights at each of the key origin airports. Delta Airlines at JFK, US Airways at LGA, and 9E at EWR exhibit the best on-time performance.
+
+```{r}
+flights_before_noon <- filter(flights, hour < 12)
+
+result <- flights_before_noon %>%
+  group_by(origin, carrier) %>%
+  summarize(q75_dep_delay = quantile(dep_delay, 0.75, na.rm = TRUE), .groups = "drop") %>%
+  ungroup()
+
+min_delay_carrier <- result %>%
+  group_by(origin) %>%
+  filter(q75_dep_delay == min(q75_dep_delay)) %>%
+  ungroup()
+
+min_delay_carrier
+```
+
+```{r}
+ggplot(result, aes(x = origin, y = q75_dep_delay, fill = carrier)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+  labs(
+    title = "Lowest 75th Percentile Departure Delay by Origin and Carrier",
+    x = "Origin Airport",
+    y = "75th Percentile Departure Delay",
+    fill = "Carrier"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+
+flights_before_noon <- filter(flights, hour < 12)
+
+
+result <- flights_before_noon %>%
+  group_by(origin, carrier) %>%
+  summarize(q75_dep_delay = quantile(dep_delay, 0.75, na.rm = TRUE), .groups = "drop") %>%
+  ungroup()
+
+
+min_delay_carrier <- result %>%
+  group_by(origin) %>%
+  filter(q75_dep_delay == min(q75_dep_delay)) %>%
+  ungroup()
+
+
+ggplot(result, aes(x = origin, y = q75_dep_delay, fill = carrier)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+  geom_jitter(data = flights_before_noon, aes(x = origin, y = dep_delay), color = "blue", alpha = 0.5, width = 0.3) +
+  labs(
+    title = "Lowest 75th Percentile Departure Delay by Origin and Carrier",
+    x = "Origin Airport",
+    y = "75th Percentile Departure Delay",
+    fill = "Carrier"
+  ) +
+  theme_minimal()
+```
+
+# Question 2
+
+Which origin airport is best to minimize my chances of a late arrival when I am using Delta Airlines?
+
+For Delta Airlines, JFK shows as the preferred choice among the origin airports to minimize the likelihood of a late arrival. With an average arrival delay of -2.38 minutes, JFK offers the best performance, ensuring a more punctual travel experience.
+
+```{r}
+
+delta_flights <- filter(flights, carrier == "DL")
+
+
+avg_delay_by_origin <- delta_flights %>%
+  group_by(origin) %>%
+  summarize(avg_arrival_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  ungroup()
+
+
+best_airport <- avg_delay_by_origin %>%
+  filter(avg_arrival_delay == min(avg_arrival_delay))
+
+
+print(avg_delay_by_origin)
+```
+
+```{r}
+ggplot(avg_delay_by_origin, aes(x = origin, y = avg_arrival_delay, fill = origin)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+  labs(title = "Average Arrival Delay by Origin for Delta Airlines",
+       x = "Origin Airport",
+       y = "Average Arrival Delay (minutes)") +
+  theme_minimal() +
+  scale_fill_discrete()
+
+```
