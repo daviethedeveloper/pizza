@@ -1,0 +1,113 @@
+---
+title: "Clean and Reformat"
+author: "David Pineda"
+format:
+  html:
+    keep-md: true
+editor: visual
+---
+
+# Import Packages
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(stringr)
+library(forcats)
+```
+
+```{r}
+url <- "https://raw.githubusercontent.com/byuistats/data/master/Dart_Expert_Dow_6month_anova/Dart_Expert_Dow_6month_anova.RDS"
+
+
+data <- read_rds(url)
+
+```
+
+```{r}
+data
+```
+
+Clean february
+
+```{r}
+
+data <- data %>% 
+  mutate(contest_period = str_replace(contest_period, "July1993-Dec.1993", "July1993-December1993")) %>%
+  mutate(contest_period = str_replace(contest_period, "Febuary-July1995", "February-July1995")) %>%
+  mutate(contest_period = str_replace(contest_period, "September1994-Febuary1995", "September1994-February1995"))
+
+```
+
+```{r}
+
+data <- data %>%
+  mutate(
+    month_end = gsub(".*-(.*?)\\d+", "\\1", contest_period),
+    year_end = as.integer(gsub(".*([0-9]{4})", "\\1", contest_period))
+  )
+
+```
+
+```{r}
+data
+```
+
+```{r}
+
+df <- data %>%
+  filter(variable == "DJIA")
+
+
+df
+
+```
+
+```{r}
+tidy_data_selected <- df %>%
+  select(value, month_end, year_end)
+```
+
+```{r}
+saveRDS(tidy_data_selected, "clean_data.rds")
+```
+
+```{r}
+df <- readRDS("clean_data.rds")
+```
+
+```{r}
+df
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+df <- df %>%
+  mutate(month = factor(month_end, levels = month.name)) %>%
+  arrange(month) %>%
+  arrange(year_end)
+df
+```
+
+```{r}
+# Check unique values in the "month_end" column
+unique(df$month_end)
+
+```
+
+```{r}
+result <- df %>%
+  pivot_wider(names_from = year_end, values_from = value) %>%
+  mutate_all(~ replace(., is.na(.), "-")) %>%
+  arrange(month) %>%
+  select(-month_end) %>%
+  rename(Month = month)
+
+result
+
+```
