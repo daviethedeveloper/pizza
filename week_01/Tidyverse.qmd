@@ -1,0 +1,679 @@
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+df <- relig_income
+```
+
+```{r}
+unique(df$religion)
+```
+```{r}
+names(df)
+```
+
+```{r}
+View(sort(table(df$"$100-150k"), decreasing = TRUE))
+```
+
+
+```{r}
+m_df <- df %>% 
+  mutate(total = rowSums(select(., -religion)))
+```
+
+```{r}
+
+```
+
+
+```{r}
+clean <- relig_income %>% 
+  pivot_longer(
+    cols = !religion,
+    names_to = "type",
+    values_to = "valz"
+  )
+```
+
+```{r}
+ggplot(clean, aes(y = religion, x = valz))+
+  geom_col() + 
+  facet_wrap(.~type)
+```
+
+```{r}
+df <- iris
+```
+
+```{r}
+glimpse(df)
+```
+
+
+```{r}
+iris %>% 
+  pivot_longer(
+    cols = c(`Sepal.Length`, `Sepal.Width`, `Petal.Length`, `Petal.Width`),
+    names_to = "type",
+    values_to = "valz") 
+```
+
+```{r}
+glimpse(df_clean)
+```
+
+
+```{r}
+unique(df_clean$type)
+```
+
+
+```{r}
+df_wide <- df_clean %>%
+  pivot_wider(
+    names_from = type,
+    values_from = valz,
+    values_fn = list  # Add this line to suppress the warning
+  )
+```
+
+
+```{r}
+# Average pedal width per species
+df_clean <-df_clean %>%
+  group_by(type) %>%
+  summarise(sum = sum(valz),
+            median = median(valz))
+```
+
+```{r}
+?diamonds
+```
+
+
+
+```{r}
+head(diamonds)
+```
+
+
+```{r}
+sort(unique(diamonds$carat))
+```
+
+
+
+Find the min and max depth of diamonds by carat and by cut.  
+```{r}
+df <- diamonds %>%
+  mutate(carat_bin = case_when(
+    carat >= 0.20 & carat <= 0.40 ~ "0.2 - 0.4",
+    carat > 0.40 & carat <= 0.61 ~ "0.4 - 0.61",
+    carat > 0.61 & carat <= 0.82 ~ "0.61 - 0.82",
+    carat > 0.82 & carat <= 1.03 ~ "0.82 - 1.03",
+    carat > 1.03 & carat <= 1.24 ~ "1.03 - 1.24",
+    carat > 1.24 & carat <= 1.45 ~ "1.24 - 1.45",
+    carat > 1.45 & carat <= 1.66 ~ "1.45 - 1.66",
+    carat > 1.66 & carat <= 1.87 ~ "1.66 - 1.87",
+    carat > 1.87 & carat <= 2.08 ~ "1.87 - 2.08",
+    carat > 2.08 & carat <= 2.29 ~ "2.08 - 2.29",
+    carat > 2.29 & carat <= 2.5 ~ "2.29 - 2.5",
+    carat > 2.5 ~ "Other"
+  )) %>% 
+  group_by(carat_bin, cut) %>%
+  summarize(min_depth = min(depth),
+            max_depth = max(depth))
+```
+
+
+```{r}
+glimpse(df)
+```
+
+```{r}
+df_clean
+```
+
+
+```{r}
+ggplot(df_clean, aes(x = sum, y = median)) +
+  geom_point() + 
+  facet_wrap(~type)
+```
+
+
+
+
+```{r}
+ggplot(df, aes(x = carat_bin, y = min_depth, fill = cut)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Minimum Depth by Carat Bin and Cut",
+       x = "Carat Bin",
+       y = "Minimum Depth") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(df, aes(x = carat_bin, y = min_depth, fill = cut)) +
+  geom_boxplot() +
+  labs(title = "Depth Distribution by Carat Bin and Cut",
+       x = "Carat Bin",
+       y = "Depth") +
+  theme_classic()
+```
+
+modification carats to grams
+```{r}
+diamonds_clean <- diamonds %>% 
+  mutate(mass_g = .20 * carat,
+         price_per_carat = price / carat, 
+         expensive_TF = price > 10000)
+glimpse(diamonds_clean)
+```
+
+```{r}
+d_mean <- diamonds %>% 
+  group_by(cut) %>% 
+  summarise(average = mean(price))
+```
+
+
+```{r}
+gapminder::gapminder
+```
+
+
+Average per each continent lifeExp after 2000
+```{r}
+glimpse(gapminder::gapminder)
+```
+
+```{r}
+df <- gapminder::gapminder
+```
+
+```{r}
+df_clean <- df %>% 
+  group_by(continent) %>% 
+  summarise(average_life_expectancy = mean(lifeExp))
+```
+
+```{r}
+table(sort(unique(df$year)))
+
+df$year %>% unique %>% sort
+```
+
+
+```{r}
+df_new <- df %>% 
+  mutate(decade = case_when(
+    year >= 1950 & year <= 1959 ~ "y_50's",
+    year >= 1960 & year <= 1969 ~ "y_60's",
+    year >= 1971 & year <= 1979 ~ "y_70's",
+    year >= 1981 & year <= 1989 ~ "y_80's",
+    year >= 1990 & year <= 1999 ~ "y_90's",
+    year >= 2000 & year <= 2010 ~ "y_2000's"
+  ))
+```
+
+```{r}
+glimpse(df_new)
+```
+
+
+```{r}
+df_new2 <- df_new %>% 
+  group_by(continent, decade) %>% 
+  summarise(average_life_expectancy = mean(lifeExp)) %>% 
+  mutate(decade = fct_relevel(decade, c("y_50's", "y_60's", "y_70's", "y_80's", "y_90's", "y_2000's")))
+
+ggplot(df_new2, aes(x = decade, y = average_life_expectancy, color = continent, group=continent)) +
+  geom_line()
+```
+
+
+```{r}
+ggplot(df_clean, aes(x = continent, y = average_life_expectancy, fill = continent)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Average Life Expectancy by Continent",
+       x = "Continent",
+       y = "Average Life Expectancy") +
+  theme_classic()
+```
+
+```{r}
+ggplot(df_sum, aes(x = Dealership, y = Total_Sales)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  coord_flip()+
+  labs(title="Number of Cars Sold by Dealership", 
+       x = NULL, 
+       y = "Total Sales") + 
+  theme_minimal() +
+  facet_grid(.~Year)
+```
+
+
+
+
+```{r}
+mpg
+```
+
+
+```{r}
+names(mpg)
+```
+
+
+```{r}
+df_clean <- mpg %>% 
+  filter(manufacturer %in% c("audi", "ford", "honda", "hyundai"))
+```
+
+
+```{r}
+#library(ggplot2)
+ggplot(df_clean, aes(x = displ, y=cty, color = manufacturer))+
+  geom_jitter(aes(size = hwy)) +
+  theme_minimal() + 
+  geom_smooth(aes(col=manufacturer), method="lm", se=F) +
+  labs(
+    title = "Bubble chart",
+    subtitle = "mpg: Displacement vs City Mileage"
+  )
+```
+
+
+
+
+
+
+### STATS ###
+```{r}
+df <- data.frame(
+  x = c(1, 2, 3, 4, 5, 6, 7, 8),
+  y = c(3.06, 7.04, 9.15, 10.78, 11.95, 13.07, 13.9, 14.63)
+)
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+plot(df$x, df$y, xlab = "x", ylab = "y")
+```
+
+
+
+```{r}
+linear_model <- lm(y ~ x, data = df)
+```
+
+
+```{r}
+summary(linear_model)
+```
+```{r}
+slope_m <- coef(linear_model)[2]
+y_intercept_b <- coef(linear_model)[1]
+```
+
+
+
+```{r}
+new_data <- data.frame(Year = 2010)
+predicted_value <- predict(linear_model, newdata = new_data)
+
+
+cat("Predicted Age for the year 2010:", predicted_value, "\n")
+
+```
+
+
+
+```{r}
+# Create a data frame with the outcome and probability columns
+df <- data.frame(
+  Outcome = c(3, 4, 9),
+  Probability = c(1/3, 1/3, 1/3)
+)
+
+# Print the data frame
+print(df)
+
+```
+
+```{r}
+# Calculate the expected value
+expected_value <- sum(df$Outcome * df$Probability)
+
+# Print the expected value
+print(expected_value)
+
+```
+
+```{r}
+# Define the sample space
+S <- c(1, 2, 3, 4, 5, 6, 7, 8)
+
+# Define the probability function P(x)
+k <- 2  # You can adjust the value of k
+P <- k^2 * S
+
+# Calculate the expected value E(S)
+expected_value <- sum(S * P) / sum(P)
+
+# Round the answer to the nearest hundredths
+expected_value <- round(expected_value, 2)
+
+# Print the expected value
+print(expected_value)
+
+```
+
+```{r}
+# Define the values and probabilities
+values <- c(0, 1, 5, 10, NA)  # Replace "y" with NA
+probabilities <- c(0.2, 0.2, 0.1, 0.3, 0.2)
+
+# Given expected value
+expected_value <- 10
+
+# Calculate the expected value equation
+equation <- sum(values * probabilities, na.rm = TRUE)
+
+# Solve for y
+y <- (expected_value - equation) / probabilities[length(probabilities)]
+
+# Print the value of y
+print(y)
+
+```
+
+
+
+```{r}
+# Define the values and probabilities
+values <- c(0, 1, 2, 31, 44, 65, 86)
+probabilities <- c(0.1, 0.11, 0.15, 0.3, 0.24, 0.08, 0.02)
+
+# Calculate the expected value
+expected_value <- sum(values * probabilities)
+
+# Print the expected value
+print(expected_value)
+
+```
+
+
+
+```{r}
+library(gsl)
+library(pracma)
+
+```
+
+```{r}
+# Define the function
+f <- function(x, c) {
+  ifelse(0 <= x & x <= 1, c * (x^2 + x), 0)
+}
+
+# Define the integral equation
+integral_equation <- function(c) {
+  integral_result <- integral(Vectorize(f), 0, 1, c = c)
+  return(integral_result - 1)
+}
+
+# Solve for c with a wider initial interval
+c_value <- uniroot(integral_equation, interval = c(0, 10))$root
+
+# Print the value of c
+cat("The value of c that makes f(x) a valid PDF is:", c_value, "\n")
+
+```
+
+
+
+```{r}
+# Define the function f(x)
+f <- function(x) {
+  ifelse(-1 <= x & x <= 1, 3 * x^2 - 1/2, 0)
+}
+
+# Check condition 1: Non-negativity
+non_negativity_check <- all(sapply(seq(-2, 2, 0.01), function(x) f(x) >= 0))
+
+# Check condition 2: Integration over the entire range equals 1
+integration_check <- integrate(Vectorize(f), -Inf, Inf)$value == 1
+
+# Print the results
+cat("Condition 1 (Non-negativity):", non_negativity_check, "\n")
+cat("Condition 2 (Integration equals 1):", integration_check, "\n")
+
+```
+
+```{r}
+# Define the probability density function f(x)
+f <- function(x) {
+  ifelse(-2 <= x & x <= 2, -3*x^2/32 + 3/8, 0)
+}
+
+# Calculate the probability P(-1 <= x <= 1)
+probability <- integrate(Vectorize(f), -1, 1)$value
+
+# Print the result
+cat("P(-1 <= x <= 1):", probability, "\n")
+
+```
+
+```{r}
+# Define the probability density function h(x)
+h <- function(x) {
+  ifelse(4 <= x & x <= 6, (3/32) * x * (x - 4), 0)
+}
+
+# Calculate the probability P(X < 5)
+probability <- integrate(Vectorize(h), -Inf, 5)$value
+
+# Print the result
+cat("P(X < 5):", round(probability, 3), "\n")
+
+```
+
+```{r}
+# Define the probability density function f(x)
+f <- function(x, k) {
+  ifelse(-2 <= x & x <= 2, k * (4 - x^2), 0)
+}
+
+# Define the integral equation
+integral_equation <- function(k) {
+  integral_result <- integrate(Vectorize(f), -Inf, Inf, k = k)$value
+  return(integral_result - 1)
+}
+
+# Solve for k
+k_value <- uniroot(integral_equation, interval = c(0, 1))$root
+
+# Print the value of k
+cat("The value of k is:", round(k_value, 3), "\n")
+
+```
+
+```{r}
+# Define the probability density function f(x)
+f <- function(x, k) {
+  ifelse(0 <= x & x <= 2, k * (5 - x), 0)
+}
+
+# Check condition 1: f(x) >= 0 for all x
+condition1_check <- all(sapply(seq(-1, 3, 0.01), function(x) f(x, k = -1) >= 0))
+
+# Check condition 2: ∫∞−∞f(x)dx = 1
+condition2_check <- integrate(Vectorize(f), -Inf, Inf, k = -1)$value == 1
+
+# Print the results
+cat("Condition 1 (f(x) >= 0 for all x):", condition1_check, "\n")
+cat("Condition 2 (∫∞−∞f(x)dx = 1):", condition2_check, "\n")
+
+```
+
+```{r}
+# Define the probability density function h(x)
+h <- function(x, k) {
+  ifelse(4 <= x & x <= 6, k * x * (x - 4), 0)
+}
+
+# Define the integral equation for finding k
+integral_equation <- function(k) {
+  integral_result <- integrate(Vectorize(h), 3, 7, k = k)$value
+  return(integral_result - 1)
+}
+
+# Solve for k
+k_value <- uniroot(integral_equation, interval = c(0, 1))$root
+
+# Calculate the probability P(3 < X < 7) using the correct k
+probability <- integrate(Vectorize(h), 3, 7, k = k_value)$value
+
+# Print the result
+cat("P(3 < X < 7):", round(probability, 3), "\n")
+
+```
+
+```{r}
+# Define the probability density function f(x)
+f <- function(x) {
+  ifelse(0 <= x & x <= 2, 1/4,
+         ifelse(2 < x & x <= 3, 1/4 * (2*x - 3), 0))
+}
+
+# Calculate the probability P(X < 2.5)
+probability <- integrate(Vectorize(f), -Inf, 2.5)$value
+
+# Print the result
+cat("P(X < 2.5):", round(probability, 2), "\n")
+
+```
+
+```{r}
+# Define the cumulative distribution function F(x)
+F <- function(x) {
+  ifelse(0 <= x & x <= 2, (1/8) * x^3, 0)
+}
+
+# Calculate the probability P(1 <= X <= 2)
+probability <- F(2) - F(1)
+
+# Print the result
+cat("P(1 <= X <= 2):", round(probability, 4), "\n")
+
+```
+
+```{r}
+# Define the cumulative distribution function G(x)
+G <- function(x) {
+  ifelse(x < 4, 0,
+         ifelse(4 <= x & x <= 6, (1/12) * x^2 - (1/3) * x, 
+                ifelse(x > 6, 1, 0)))
+}
+
+# Calculate the probability P(X > 4.5)
+probability <- 1 - G(4.5)
+
+# Print the result
+cat("P(X > 4.5):", round(probability, 4), "\n")
+
+```
+
+```{r}
+# Define the cumulative distribution function H(x)
+H <- function(x) {
+  ifelse(x < 4, 0,
+         ifelse(4 <= x & x <= 6, (1/32) * x^3 - (3/16) * x^2 + 1, 
+                ifelse(x > 6, 1, 0)))
+}
+
+# Calculate the probability P(X > 4.5)
+probability <- 1 - H(4.5)
+
+# Print the result
+cat("P(X > 4.5):", round(probability, 3), "\n")
+
+```
+
+```{r}
+# Define the cumulative distribution function F(x)
+F <- function(x) {
+  ifelse(x < 0, 0,
+         ifelse(0 <= x & x <= 2, (1/4) * x,
+                ifelse(2 < x & x <= 3, (1/4) * x^2 - (3/4) * x + 1,
+                       ifelse(x > 3, 1, 0))))
+}
+
+# Calculate the probability P(X > 2.1)
+probability <- 1 - F(2.1)
+
+# Print the result
+cat("P(X > 2.1):", round(probability, 4), "\n")
+
+```
+
+```{r}
+# Define the function f(x)
+f <- function(x) {
+  3 - abs(3 - x)
+}
+
+# Set the interval [a, b]
+a <- 0
+b <- 6
+
+# Set the number of subintervals (n)
+n <- 6
+
+# Calculate the width of each subinterval
+h <- (b - a) / n
+
+# Approximate the area using the trapezoidal rule
+approx_area <- h/2 * (f(a) + 2 * sum(f(seq(a + h, b - h, h))) + f(b))
+
+# Print the result
+cat("Approximate Area under the curve:", round(approx_area, 4), "\n")
+
+```
+
+
+```{r}
+# Define the function f(x)
+f <- function(x) {
+  4 * x
+}
+
+# Set the interval [a, b]
+a <- 1
+b <- 5
+
+# Set the number of rectangles (n)
+n <- 8
+
+# Calculate the width of each rectangle
+delta_x <- (b - a) / n
+
+# Calculate the right Riemann sum
+right_riemann_sum <- sum(f(seq(a + delta_x, b, delta_x)) * delta_x)
+
+# Print the result
+cat("Right Riemann Sum (8 rectangles):", right_riemann_sum, "\n")
+
+```
+

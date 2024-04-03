@@ -1,0 +1,118 @@
+---
+title: "challenge template"
+format:
+  html:
+    self-contained: true
+    code-fold: true
+---
+
+```{r}
+#| warning: false
+#| message: false
+
+
+library(ggplot2)
+library(readr)
+library(scales)
+library(ggthemes)
+library(plotly)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+```
+
+```{r}
+df <- read_csv("dealers.csv")
+```
+
+```{r}
+glimpse(df)
+df #%>% janitor::clean_names()
+```
+
+```{r}
+unique(df$...1)
+```
+
+```{r}
+df
+```
+
+```{r}
+df_long <- df %>%
+  pivot_longer(cols = -c(...1, "REGIONAL AVG"), 
+               names_to = "Dealership", 
+               values_to = "Sales")
+```
+
+```{r}
+glimpse(df_long)
+```
+
+```{r}
+df_long <- df_long %>%
+  mutate(Year = str_extract(...1, "\\d{4}"))
+```
+
+```{r}
+df_sum <- df_long %>%
+  group_by(Dealership, Year) %>%
+  summarise(Total_Sales = sum(Sales))
+```
+
+```{r}
+glimpse(df_sum)
+```
+
+
+
+
+```{r}
+ggplot(df_sum, aes(x = Dealership, y = Total_Sales)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  coord_flip()+
+  labs(title="Number of Cars Sold by Dealership", 
+       x = NULL, 
+       y = "Total Sales") + 
+  theme_minimal() +
+  facet_grid(.~Year)
+```
+
+
+```{r}
+df <- read_csv("dealers.csv")
+```
+```{r}
+df
+```
+
+```{r}
+df_clean <- df %>% 
+  pivot_longer(cols = -c(...1,"REGIONAL AVG"), 
+               names_to = "Dealership", 
+               values_to = "Sales")
+```
+
+get the year extracted string
+```{r}
+df_clean <- df_clean %>%
+  mutate(Year = str_extract(...1, "\\d{4}"))
+```
+
+```{r}
+df_sum <- df_clean %>%
+  group_by(Dealership, Year) %>%
+  summarise(Total_Sales = sum(Sales))
+```
+
+```{r}
+ggplot(df_sum, aes(x = Dealership, y = Total_Sales)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  coord_flip()+
+  labs(title="Number of Cars Sold by Dealership", 
+       x = NULL, 
+       y = "Total Sales") + 
+  theme_classic() +
+  facet_grid(.~Year)
+```
+
